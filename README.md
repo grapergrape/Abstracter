@@ -13,7 +13,7 @@ There are two main ways to use this setup:
 
 - Python 3.8+ 
 - Docker (only needed if using docker-compose)
-- An OpenAI account with an API key. If you don't have one, you can create it [here]([https://www.openai.co](https://platform.openai.com/account/api-keys).
+- An OpenAI account with an API key. If you don't have one, you can create it [here]([https://www.openai.co](https://platform.openai.com/account/api-keys)).
 
 ## Setup Instructions
 
