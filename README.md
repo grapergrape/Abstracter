@@ -60,8 +60,10 @@ To run the project using docker-compose:
 
 This project supports two models:
 
-    text-davinci-003: A cheaper option but may yield lower quality results.
+    gpt-3.5-turbo-0301: A cheaper option but may yield lower quality results.
     gpt-4: Provides better performance but is more expensive.
+
+You can switch between them in the code by using llm or llm1 when calling the model.
 
 To set your preferred model, navigate to the Abstracter class in main.py and modify the model_name parameter in the ChatOpenAI and OpenAI instances under the __init__ method.
 
