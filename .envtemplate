@@ -1,0 +1,2 @@
+# rename to .env, replace bellow with your own openai api key
+OPENAI_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

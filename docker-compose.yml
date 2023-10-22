@@ -1,0 +1,7 @@
+version: '3'
+services:
+  abstracter:
+    build: .
+    volumes:
+      - .:/app
+      - ./output:/output
