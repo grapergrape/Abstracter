@@ -19,12 +19,12 @@ There are two main ways to use this setup:
 
 1. Clone this repository:
 
-git clone <repository-url>
+`git clone <repository-url>`
 
 
 2. Navigate to the project root directory:
 
-cd <project-directory>
+`cd <project-directory>`
 
 
 3. Rename the `.envtemplate` file to `.env`:
@@ -38,7 +38,7 @@ cd <project-directory>
 
 Install the required dependencies:
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 
 To run the project interactively, ensure you are in the root directory of the project. Run `python main.py` and when prompted, enter your question.
@@ -52,11 +52,11 @@ To run the project using docker-compose:
 2. In `main.py`, replace the line where the `question` variable is defined with your predefined question:
 
 
-question = "Effect of microplastics on different types of zooplankton?"
+`question = "Effect of microplastics on different types of zooplankton?"`
 
 3. Build and run the Docker container:
 
-docker-compose up --build -d
+`docker-compose up --build -d`
 
 ## Model Selection
 
