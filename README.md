@@ -19,12 +19,10 @@ There are two main ways to use this setup:
 
 1. Clone this repository:
 
-`git clone <repository-url>`
+`git clone git@github.com:grapergrape/Abstracter.git`
 
 
-2. Navigate to the project root directory:
-
-`cd <project-directory>`
+2. Open project using VSCode
 
 
 3. Rename the `.envtemplate` file to `.env`:
