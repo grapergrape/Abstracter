@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from langchain.agents import Tool, initialize_agent, AgentType
-from langchain.llms.openai import OpenAI
 from langchain.agents import initialize_agent, AgentType
 from langchain.memory import ConversationBufferMemory
 from helpers.toolset import extract_abstract_from_pdf, get_sorted_pdf_file_path, store_text, read_text, inverse_boolean_string
@@ -14,7 +13,7 @@ class Abstracter:
     def __init__(self):
         self.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         self.llm1 = ChatOpenAI(model_name="gpt-4")
-        self.llm = OpenAI(model_name="text-davinci-003")
+        self.llm = ChatOpenAI(model_name="gpt-3.5-turbo-0301")
         self.tools = [
             Tool(
                 name="AbstractExtractor",
