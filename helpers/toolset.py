@@ -35,13 +35,22 @@ def extract_abstract_from_pdf(pdf_file_path):
             
             # find the index of the first word of the found pattern
             try:
+                print(found_pattern[0])
                 pattern_index = words.index(found_pattern[0])
             except ValueError:
                 return "Pattern not found in the list of words"
             
             # Take the next 450 words after the found pattern
             abstract_words = words[pattern_index + len(found_pattern) : pattern_index + len(found_pattern) + 450]
-            
+            # cut anything before pattern_index + len(found_pattern) + 450
+            # cut after word introduction or © sign or Department or Email
+
+            abstract_words = abstract_words[:abstract_words.index("Introduction")] if "Introduction" in abstract_words else abstract_words
+            """abstract_words = abstract_words[:abstract_words.index("©")] if "©" in abstract_words else abstract_words
+            abstract_words = abstract_words[:abstract_words.index("Department")] if "Department" in abstract_words else abstract_words
+            abstract_words = abstract_words[:abstract_words.index("Email")] if "Email" in abstract_words else abstract_words
+"""
+
             # Join the words back into a string
             abstract = ' '.join(abstract_words)
 

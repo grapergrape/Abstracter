@@ -17,11 +17,6 @@ class Abstracter:
         self.llm = ChatOpenAI(model_name="gpt-3.5-turbo-0301")
         self.tools = [
             Tool(
-                name="StoreText",
-                func=lambda string: store_text(string),
-                description="useful for when you need to store text of any length to helperdir/helper.txt",
-            ),
-            Tool(
                 name="Read Text",
                 func=lambda dummy: read_text(dummy),
                 description="useful for when you need to read from helperdir/helper.txt",
@@ -35,22 +30,21 @@ class Abstracter:
             self.tools, self.llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, handle_parsing_errors=True
         )
     
-    def get_relevance_score(self, question, i):
-        path = get_sorted_pdf_file_path(i)
-        # Check if the path is valid
-        if not os.path.exists(path):
-            print("Error: Invalid file path.")
-            return
-        text = extract_abstract_from_pdf(path)
-
+    def get_relevance_score(self, question):
+        # read helperdir/helper.txt and store it into text
+        text = read_text("")
         # prompt the worker to assign a relevance score to the text based on question
-        relevance_prompt = f"If the text stored in helperdir/helper.txt is entirely relevant to the question '{question}', it would be 100%. If it is not relevant at all, it would be 0%. Make up and output a number to the relevance of the text to the question in percentages?"
+        relevance_prompt = f'''If the text: {text} shows high possibility to conatin anwser to the question '{question}', it would be 100%. If it is not relevant at all, it would be 0%. 
+                            Assign a relevance score to the text based on the question without using any tools, in a single step.
+                            Always output an actual number (not X) to the relevance of the text to the question in percentages, which you will defend in the next prompt?'''
         relevance_output = self.worker.run(relevance_prompt)
         relevance_score = int(re.search(r'\d+', relevance_output).group())
-        print()
         # prompt the worker to write an explanation for the relevance score
-        explanation_prompt = f"Explain, in a single paragraph, why you assigned the relevance score of {relevance_score} to the text: stored in helperdir/helper.txt based on the question: {question}."
+        explanation_prompt = f"Explain, in a single, detailed paragraph with comparison to the text {text} , why you assigned the relevance score of {relevance_score} to the text: {question}."
         explanation = self.worker.run(explanation_prompt)
+
+        # clear helper.txt
+        store_text("")
 
         return relevance_score, explanation
     
@@ -71,8 +65,6 @@ class Abstracter:
         """reasoning_prompt = f"Explain why you assigned the value of {status} for the relevance to the field of study: {question} on the text in helperdir/helper.txt."
         reasoning = self.agent.run(reasoning_prompt)"""
 
-        # clear helper.txt
-        store_text("")
 
         #print(reasoning)
         return status
@@ -103,7 +95,7 @@ if __name__ == "__main__":
     # For every file in the pdf/ directory, extract the abstract and check if it contains the answer to the question, i is the number of all files in pdf dir
     for i in range(len(os.listdir('pdf/'))):  # Update directory path to 'pdf/'
         status = abstracter.search_abstracts(question, i)
-        score, explanation = abstracter.get_relevance_score(question, i)
+        score, explanation = abstracter.get_relevance_score(question)
         article_scores[get_sorted_pdf_file_path(i)] = (score, explanation)
         if status == 'True':
             files_with_answers.append(get_sorted_pdf_file_path(i))
@@ -121,7 +113,7 @@ if __name__ == "__main__":
     for file in files_with_answers:
         #Write into .txt file in output/ directory if it exists otherwise create it
         with open('output/output.txt', 'a') as f:
-            f.write(os.path.basename(file) + '\n')
+            f.write(f"{os.path.basename(file)}\n")
 
     # Write the report
     with open('output/report.md', 'a') as f:
