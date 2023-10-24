@@ -1,21 +1,24 @@
 import os
 from Bio import Entrez
 from dotenv import load_dotenv
+import time
 
 class Fetcher:
-    def __init__(self, query):
+    def __init__(self, query, nr_results):
         load_dotenv()
         self.email = os.getenv('EMAIL')
         Entrez.email = self.email
         self.query = query
+        self.nr_results = nr_results
 
     def search(self):
         handle = Entrez.esearch(db='pubmed',
                                 sort='relevance',
-                                retmax='5',
+                                retmax=self.nr_results,
                                 retmode='xml',
                                 term=self.query)
         results = Entrez.read(handle)
+        time.sleep(0.1)  # Timeout to rate limit API key to not get IP blocked from NCBI
         return results
 
     def fetch_details(self, id_list):
@@ -24,6 +27,7 @@ class Fetcher:
                                retmode='xml',
                                id=ids)
         results = Entrez.read(handle)
+        time.sleep(0.1)  # Timeout to rate limit API key to not get IP blocked from NCBI
         return results
 
     def fetch(self):
@@ -44,8 +48,6 @@ class Fetcher:
 
 
 if __name__ == '__main__':
-    fetcher = Fetcher('FTIR classification of microplastics')
+    fetcher = Fetcher('FTIR classification of microplastics', 5)
     papers = fetcher.fetch()
     print(papers)
-        
-    

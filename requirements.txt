@@ -3,4 +3,3 @@ python-dotenv==0.19.2
 PyMuPDF==1.19.6
 langchain==0.0.313
 biopython==1.81
-```

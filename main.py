@@ -1,11 +1,14 @@
 import os
 import re
+import json
 from dotenv import load_dotenv
+
 from langchain.agents import Tool, initialize_agent, AgentType
-from langchain.agents import initialize_agent, AgentType
 from langchain.memory import ConversationBufferMemory
-from helpers.toolset import extract_abstract_from_pdf, get_sorted_pdf_file_path, store_text, read_text, inverse_boolean_string
 from langchain.chat_models import ChatOpenAI
+
+from helpers.toolset import extract_abstract_from_pdf, get_sorted_pdf_file_path, store_text, read_text, inverse_boolean_string
+from helpers.get_abstracts import Fetcher
 # Load environment variables from .env
 load_dotenv()
 
@@ -57,7 +60,7 @@ class Abstracter:
         text = extract_abstract_from_pdf(path)
 
         # Change between worker (cheapest gpt 3) and agent (gpt4)
-        status_prompt = f"Analyze the text stored in helperdir/helper.txt. Does it mentiion anything that would indicate a relation to this: (True/False): {question}?"
+        status_prompt = f"Analyze the text stored in helperdir/helper.txt. Does it indicate in anyway that it would have a relation to this: (True/False): {question}?"
         status = self.agent.run(status_prompt)
 
 
@@ -69,11 +72,55 @@ class Abstracter:
         #print(reasoning)
         return status
     
+    def fetch_abstracts_online(self, query, nr):
+        fetcher = Fetcher(query, nr)
+        papers = fetcher.fetch()
+        return papers
+    
+    def process_fetched_abstracts(self, papers, question):
+        for paper in papers:
+            title = paper['title']
+            abstract = paper['abstract']
+            store_text(abstract)
+            status = self.agent.run(f"Analyze the text stored in helperdir/helper.txt. Does it mention anything that would indicate a relation to this: (True/False): {question}?")
+            if status == "False":
+                store_text("")
+                continue
+            else: 
+                print(f"Title: {title}\nAbstract: {abstract}\nStatus: {status}\n\n\n")
+            # if status true write into output/literature.txt the names of the articles
+            if status == "True":
+                with open('output/literature.txt', 'a') as f:
+                    f.write(f"{title}\n")
+            store_text("")
+
+    def store_to_json(self, query, nr_results, papers):
+        data = {
+            "query": query,
+            "number_of_results": nr_results,
+            "papers": papers
+        }
+        with open('helperdir/pubmed.json', 'w') as f:
+            json.dump(data, f, indent=2)
+
+    def check_json(self, query, nr_results):
+        # Check if pubmed.json exists
+        if os.path.exists('pubmed.json'):
+            # If it exists, load the data
+            with open('pubmed.json', 'r') as f:
+                data = json.load(f)
+            # Compare the stored query and number of results to the provided parameters
+            if data["query"] == query and data["number_of_results"] == nr_results and len(data["papers"]) > 0:
+                # If they match and there are papers, return the papers
+                return data["papers"]
+        # If the file does not exist, or the stored data does not match the provided parameters, 
+        # or there are no papers, return None
+        return None
+
 if __name__ == "__main__":
 
     # Create instance of Abstracter class
     abstracter = Abstracter()   
-
     #Clear output.txt file
     with open('output/output.txt', 'w') as f:
         f.write('')
@@ -82,48 +129,67 @@ if __name__ == "__main__":
     with open('output/report.md', 'w') as f:
         f.write('')
 
-    # Hardcode your question here if running wtih docker-compose
-    question = "Evaluation of effects of microplastics on zooplanktons ability to feed it self"
+    mode = input("Enter 1 for local abstract analysis from pdf files or 2 to fetch articles online: ")
+    if mode == "1":
+        # Hardcode your question here if running wtih docker-compose
+        question = "Evaluation of effects of microplastics on zooplanktons ability to feed it self"
 
-    # interactive input, not suitable for docker-compose run
-    #question = input("Enter your question: ")
+        # interactive input, not suitable for docker-compose run
+        #question = input("Enter your question: ")
 
-    #question = "Effect of microplastics on different types of zooplankton?"
-    files_with_answers = []
-    article_scores = dict()  # Dictionary to store the relevance scores of each article
+        #question = "Effect of microplastics on different types of zooplankton?"
+        files_with_answers = []
+        article_scores = dict()  # Dictionary to store the relevance scores of each article
 
-    # For every file in the pdf/ directory, extract the abstract and check if it contains the answer to the question, i is the number of all files in pdf dir
-    for i in range(len(os.listdir('pdf/'))):  # Update directory path to 'pdf/'
-        status = abstracter.search_abstracts(question, i)
-        score, explanation = abstracter.get_relevance_score(question)
-        article_scores[get_sorted_pdf_file_path(i)] = (score, explanation)
-        if status == 'True':
-            files_with_answers.append(get_sorted_pdf_file_path(i))
-        else:
-            continue
-
-
-    # Sort the dictionary by score
-    sorted_articles = dict(sorted(article_scores.items(), key=lambda item: item[1][0], reverse=True))
+        # For every file in the pdf/ directory, extract the abstract and check if it contains the answer to the question, i is the number of all files in pdf dir
+        for i in range(len(os.listdir('pdf/'))):  # Update directory path to 'pdf/'
+            status = abstracter.search_abstracts(question, i)
+            score, explanation = abstracter.get_relevance_score(question)
+            article_scores[get_sorted_pdf_file_path(i)] = (score, explanation)
+            if status == 'True':
+                files_with_answers.append(get_sorted_pdf_file_path(i))
+            else:
+                continue
 
 
+        # Sort the dictionary by score
+        sorted_articles = dict(sorted(article_scores.items(), key=lambda item: item[1][0], reverse=True))
 
 
-    # Print the names of the PDFs that contain the possible answer in the abstract
-    for file in files_with_answers:
-        #Write into .txt file in output/ directory if it exists otherwise create it
-        with open('output/output.txt', 'a') as f:
-            f.write(f"{os.path.basename(file)}\n")
 
-    # Write the report
-    with open('output/report.md', 'a') as f:
-        first_below_80 = True
-        for file, (score, explanation) in sorted_articles.items():
-            if first_below_80 and score < 80:
-                f.write('---\n')
-                f.write('## Articles with Score Below 80\n')
-                f.write('---\n')
-                first_below_80 = False
-            f.write(f'### {os.path.basename(file)}\n')
-            f.write(f'Relevance Score: {score}\n')
-            f.write(f'Explanation: {explanation}\n\n')
+
+        # Print the names of the PDFs that contain the possible answer in the abstract
+        for file in files_with_answers:
+            #Write into .txt file in output/ directory if it exists otherwise create it
+            with open('output/output.txt', 'a') as f:
+                f.write(f"{os.path.basename(file)}\n")
+
+        # Write the report
+        with open('output/report.md', 'a') as f:
+            first_below_80 = True
+            for file, (score, explanation) in sorted_articles.items():
+                if first_below_80 and score < 80:
+                    f.write('---\n')
+                    f.write('## Articles with Score Below 80\n')
+                    f.write('---\n')
+                    first_below_80 = False
+                f.write(f'### {os.path.basename(file)}\n')
+                f.write(f'Relevance Score: {score}\n')
+                f.write(f'Explanation: {explanation}\n\n')
+
+    elif mode == "2":
+        query = "Optical microplastic identification"
+        # how many articles do you want to check from pubmd (note it searches in chronological order)
+        nr_results = 20
+
+        # Check if the same query has been rerun and OpenAI api failed after so we dont overwork pubmed api
+        papers = abstracter.check_json(query, nr_results)
+
+        if papers is None:
+            papers = abstracter.fetch_abstracts_online(query, nr_results)
+            # store the query and all papers in helperdir/pubmd.json for future use if openai api fails
+            abstracter.store_to_json(query, nr_results, papers)
+
+        if papers:
+            question = "Performance analysis of different methods of optical classification of microplastics"
+            abstracter.process_fetched_abstracts(papers, question)
