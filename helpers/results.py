@@ -21,7 +21,7 @@ class Resulter:
     def predict(self, input):
         return self.conversation.predict(input=input)
 
-    def get_article_text(self, pdf_file_path):
+    def get_article_text_fitz(self, pdf_file_path):
         with fitz.open(pdf_file_path) as pdf_file:
             # Initialize an empty string to hold the text of the PDF
             context = ""
@@ -49,13 +49,12 @@ class Resulter:
             i += chunk_size
         return results
 
-    def process_pdf(self, pdf_file_path, question):
-        article_text = self.get_article_text(pdf_file_path)
+    def process_pdf_fitz(self, pdf_file_path, question):
+        article_text = self.get_article_text_fitz(pdf_file_path)
         return self.index_relevant_parts(article_text, question)
     
     def summarize(self, relevant_parts, question):
         summarized_chunks = []
-        print(relevant_parts)
         
         if relevant_parts == []:
             return "No relevant parts found"
@@ -72,14 +71,20 @@ class Resulter:
         print(sumarized_unit)
         final_summary_prompt = f"Anwser the query: '{question}' with a single, atleast 1500 words long, comperhensive summary of the findings in the following text: {sumarized_unit}"
         final_summary = self.predict(input = final_summary_prompt)
+            
+
         return final_summary
     
 
 if __name__ == "__main__":
     resulter = Resulter(window_size=0)
-    pdf_path = "pdf/1-s2.0-S0269749118333190-main.pdf"
-    start_question = "Effect of microplastics on zooplanktons ability to grow"
+    pdf_path = "pdf/as-74-9-1012-1.pdf"
+    start_question = "What is flowcytometry and how does it preform?"
     question = f"Does the following text contain chunks showing relevance to the question {start_question}, return a string only 'True' or 'False', no explanation for decision:"
-    relevant_parts = resulter.process_pdf(pdf_path, question)
-    anwser = resulter.summarize(relevant_parts, start_question)
+    found_status = False
+    while not found_status:
+        relevant_parts = resulter.process_pdf_fitz(pdf_path, question)
+        anwser = resulter.summarize(relevant_parts, start_question)
+        if anwser != "No relevant parts found":
+            found_status = True
     print(anwser)

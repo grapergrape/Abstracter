@@ -9,6 +9,7 @@ from langchain.chat_models import ChatOpenAI
 
 from helpers.toolset import extract_abstract_from_pdf, get_sorted_pdf_file_path, store_text, read_text, inverse_boolean_string
 from helpers.get_abstracts import Fetcher
+from helpers.results import get_results
 # Load environment variables from .env
 load_dotenv()
 
@@ -129,7 +130,7 @@ if __name__ == "__main__":
     with open('output/report.md', 'w') as f:
         f.write('')
 
-    mode = input("Enter 1 for local abstract analysis from pdf files or 2 to fetch articles online: ")
+    mode = input("Enter:\n1 for local abstract analysis from pdf files, \n2 to fetch articles online, \n3 to get an anwser to a question from a pdf article. ")
     if mode == "1":
         # Hardcode your question here if running wtih docker-compose
         question = "Evaluation of effects of microplastics on zooplanktons ability to feed it self"
@@ -193,3 +194,14 @@ if __name__ == "__main__":
         if papers:
             question = "Performance analysis of different methods of optical classification of microplastics"
             abstracter.process_fetched_abstracts(papers, question)
+    
+    elif mode == "3":
+        question = "What is flowcytometry and how does it preform?"
+        anwser = get_results("pdf/as-74-9-1012-1.pdf", question)
+        print(anwser)
+        # Clear anwser.txt file
+        with open('output/anwser.txt', 'w') as f:
+            f.write('')
+        # Write the anwser
+        with open('output/anwser.txt', 'a') as f:
+            f.write(f'{anwser}')
