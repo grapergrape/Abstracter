@@ -14,6 +14,7 @@ There are two main ways to use this setup:
 - Python 3.8+ 
 - Docker (only needed if using docker-compose)
 - An OpenAI account with an API key. If you don't have one, you can create it [here](https://platform.openai.com/account/api-keys)
+- pubmed account
 
 ## Setup Instructions
 
@@ -28,7 +29,7 @@ There are two main ways to use this setup:
 3. Rename the `.envtemplate` file to `.env`:
 
 
-4. Open the `.env` file and replace `sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` with your OpenAI API key.
+4. Open the `.env` file and replace `sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` with your OpenAI API key and add you pubmed account aswell.
 
 ## Running the Project
 
@@ -41,7 +42,7 @@ Install the required dependencies:
 
 To run the project interactively, ensure you are in the root directory of the project. Run `python main.py` and when prompted, enter your question.
 
-### Docker-compose Mode
+### Docker-compose Mode DEPRICATED due to interactive mode selection
 
 To run the project using docker-compose:
 
