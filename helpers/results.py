@@ -32,7 +32,7 @@ class Resulter:
                 context += page.get_text("text")  
         return context
 
-    def index_relevant_parts(self, article_text, question, chunk_size=14000):
+    def index_relevant_parts(self, article_text, question, chunk_size):
         results = []
         i = 0
         while i < len(article_text):
@@ -49,9 +49,9 @@ class Resulter:
             i += chunk_size
         return results
 
-    def process_pdf_fitz(self, pdf_file_path, question):
+    def process_pdf_fitz(self, pdf_file_path, question, chunk_size):
         article_text = self.get_article_text_fitz(pdf_file_path)
-        return self.index_relevant_parts(article_text, question)
+        return self.index_relevant_parts(article_text, question, chunk_size)
     
     def summarize(self, relevant_parts, question):
         summarized_chunks = []
@@ -60,7 +60,7 @@ class Resulter:
             return "No relevant parts found"
         for _, chunk in relevant_parts:
             # Prepare the prompt
-            prompt = f"Summarize the findings in the following text: {chunk}"
+            prompt = f"Summarize the findings in the following text, pretend you are a scientist writing an article: {chunk}"
             # Generate the summary
             summary = self.predict(input=prompt)
             # Append the summary to the list
@@ -74,17 +74,35 @@ class Resulter:
             
 
         return final_summary
-    
+
+def get_results(path, start_question):
+    resulter = Resulter(window_size=0)
+    pdf_path = path
+    question = f"Does the following text contain chunks showing relevance to the question {start_question}, return a string only 'True' or 'False', no explanation for decision:"
+    found_status = False
+    chunk_size = 14000
+    while not found_status:
+        relevant_parts = resulter.process_pdf_fitz(pdf_path, question, chunk_size)
+        anwser = resulter.summarize(relevant_parts, start_question)
+        if len(anwser.split()) > 200:
+            found_status = True
+        # decrease chunk size if no relevant parts found
+        chunk_size -= 1000
+    return anwser
 
 if __name__ == "__main__":
     resulter = Resulter(window_size=0)
     pdf_path = "pdf/as-74-9-1012-1.pdf"
     start_question = "What is flowcytometry and how does it preform?"
     question = f"Does the following text contain chunks showing relevance to the question {start_question}, return a string only 'True' or 'False', no explanation for decision:"
+    chunk_size = 14000
     found_status = False
     while not found_status:
-        relevant_parts = resulter.process_pdf_fitz(pdf_path, question)
+        relevant_parts = resulter.process_pdf_fitz(pdf_path, question, chunk_size)
         anwser = resulter.summarize(relevant_parts, start_question)
-        if anwser != "No relevant parts found":
+        # check if no anwser was found or if the anwser is shorter than 1500 words
+        if len(anwser.split()) > 200:
             found_status = True
+        # Reduce chunk size if no relevant parts found to ensure nothing was found due to cut off
+        chunk_size -= 1000
     print(anwser)
