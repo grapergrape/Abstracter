@@ -1,3 +1,5 @@
 # rename to .env, replace bellow with your own openai api key and registered pubmed email
-OPENAI_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-EMAIL = "your-registered.pubmed-email@domain.com"
+OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+EMAIL="your-registered.pubmed-email@domain.com"
+SCOPUS_API_KEY=""
+IEEE_API_KEY=""

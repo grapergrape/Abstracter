@@ -1,6 +1,7 @@
 import os
 import re
 import json
+from collections import Counter
 from dotenv import load_dotenv
 
 from langchain.agents import Tool, initialize_agent, AgentType
@@ -8,7 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 
 from helpers.toolset import extract_abstract_from_pdf, get_sorted_pdf_file_path, store_text, read_text, inverse_boolean_string
-from helpers.get_abstracts import Fetcher
+from helpers.get_abstracts import Fetcher_pubmed, Fetcher_Scopus
 from helpers.results import get_results
 # Load environment variables from .env
 load_dotenv()
@@ -33,7 +34,28 @@ class Abstracter:
         self.worker = initialize_agent(
             self.tools, self.llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, handle_parsing_errors=True
         )
-    
+
+    def most_referenced_authors(self, library):
+        file_path = f'helperdir/{library}.json'
+        # Load JSON from file
+        with open(file_path) as f:
+            pubmed_json = json.load(f)
+
+        # Initialize a list to store all authors
+        all_authors = []
+        
+        # Extract authors from each article and add them to the all_authors list
+        for paper in pubmed_json["papers"]:
+            all_authors.extend(paper["authors"])
+            
+        # Use the Counter to count the occurrence of each author
+        author_counts = Counter(all_authors)
+        
+        # Filter and print authors referenced at least 2 times
+        for author, count in author_counts.items():
+            if count >= 2:
+                print(f'Author: {author} - Number of References: {count}')
+        
     def get_relevance_score(self, question):
         # read helperdir/helper.txt and store it into text
         text = read_text("")
@@ -73,27 +95,42 @@ class Abstracter:
         #print(reasoning)
         return status
     
+    
     def fetch_abstracts_online(self, query, nr):
-        fetcher = Fetcher(query, nr)
+        fetcher = Fetcher_pubmed(query, nr)
         papers = fetcher.fetch()
         return papers
     
     def process_fetched_abstracts(self, papers, question):
+        relevant_papers = []  # list for holding relevant papers
         for paper in papers:
             title = paper['title']
             abstract = paper['abstract']
             store_text(abstract)
-            status = self.agent.run(f"Analyze the text stored in helperdir/helper.txt. Does it mention anything that would indicate a relation to this: (True/False): {question}?")
-            if status == "False":
+
+            status = self.worker.run(f"Analyze the text stored in helperdir/helper.txt. Does it mention anything that would indicate a relation to this: (say only 'True'/'False'): {question}?")
+
+            if "False" in status or status == "" or "False." in status:
+                paper['relevance_status'] = False
                 store_text("")
                 continue
             else: 
                 print(f"Title: {title}\nAbstract: {abstract}\nStatus: {status}\n\n\n")
-            # if status true write into output/literature.txt the names of the articles
-            if status == "True":
+                paper['relevance_status'] = " "
+
+            if "True" in status:
+                paper['relevance_status'] = True
+                relevant_papers.append(paper)  # add the relevant paper to the list
+
                 with open('output/literature.txt', 'a') as f:
                     f.write(f"{title}\n")
             store_text("")
+    
+        # Save only those papers to pubmed.json which have relevance_status set to True
+        with open('helperdir/pubmed.json', 'w') as f:
+            json.dump(relevant_papers, f, indent=2)
+            
+        
 
     def store_to_json(self, query, nr_results, papers):
         data = {
@@ -179,9 +216,9 @@ if __name__ == "__main__":
                 f.write(f'Explanation: {explanation}\n\n')
 
     elif mode == "2":
-        query = "Optical microplastic identification"
+        query = "raman spectroscopy micro plastic"
         # how many articles do you want to check from pubmd (note it searches in chronological order)
-        nr_results = 20
+        nr_results = 10
 
         # Check if the same query has been rerun and OpenAI api failed after so we dont overwork pubmed api
         papers = abstracter.check_json(query, nr_results)
@@ -190,12 +227,25 @@ if __name__ == "__main__":
             papers = abstracter.fetch_abstracts_online(query, nr_results)
             # store the query and all papers in helperdir/pubmd.json for future use if openai api fails
             abstracter.store_to_json(query, nr_results, papers)
+        mode_2_status = False
+        while mode_2_status == False:
+            mode_fetcher = input("Enter:\n1 to analyze abstracts from pubmed, \n2 to exit. ")
 
-        if papers:
-            question = "Performance analysis of different methods of optical classification of microplastics"
-            abstracter.process_fetched_abstracts(papers, question)
+            if mode_fetcher == "1":
+                abstracter.most_referenced_authors("pubmed")
+                scopus = Fetcher_Scopus('helperdir/pubmed.json')
+                papers = scopus.enrich_paper()
+                if papers:
+                    question = "evaluation of raman specroscopy as a method of detection"
+                    abstracter.process_fetched_abstracts(papers, question)
+            elif mode_fetcher == "2":
+                mode_2_status = True
+            
+            
+
     
     elif mode == "3":
+        # Hardocde your question here which will be anwsered from the pdf file
         question = "What is flowcytometry and how does it preform?"
         anwser = get_results("pdf/as-74-9-1012-1.pdf", question)
         print(anwser)

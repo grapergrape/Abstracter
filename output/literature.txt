@@ -10,3 +10,57 @@ Detection methods of micro and nanoplastics.
 Analysis of microplastics in wetland samples from coastal Ghana using the Rose Bengal stain.
 SEM/EDS and optical microscopy analyses of microplastics in ocean trawl and fish guts.
 Automated method for routine microplastic detection and quantification.
+A cancer graph: a lung cancer property graph database in Neo4j.
+An integrated network representation of multiple cancer-specific data for graph-based machine learning.
+Identification of Cancer Driver Modules Based on Graph Clustering from Multiomics Data.
+Geometric graph neural networks on multi-omics data to predict cancer survival outcomes.
+ARCANE-ROG: Algorithm for reconstruction of cancer evolution from single-cell data using robust graph learning.
+omicsGAT: Graph Attention Network for Cancer Subtype Analyses.
+DualGCN: a dual graph convolutional network model to predict cancer drug response.
+PATIENT-SPECIFIC DATA FUSION FOR CANCER STRATIFICATION AND PERSONALISED TREATMENT.
+Multi-View Random-Walk Graph Regularization Low-Rank Representation for Cancer Clustering and Differentially Expressed Gene Selection.
+Prediction and interpretation of cancer survival using graph convolution neural networks.
+Predicting cancer drug response using parallel heterogeneous graph convolutional networks with neighborhood interactions.
+Identifying cancer driver genes based on multi-view heterogeneous graph convolutional network and self-attention mechanism.
+Review: A Roadmap to Use Nonstructured Data to Discover Multitarget Cancer Therapies.
+HMM-GDAN: Hybrid multi-view and multi-scale graph duplex-attention networks for drug response prediction in cancer.
+DeepCDR: a hybrid graph convolutional network for predicting cancer drug response.
+Graph of graphs analysis for multiplexed data with application to imaging mass cytometry.
+A platform for oncogenomic reporting and interpretation.
+Elucidating tumor heterogeneity from spatially resolved transcriptomics data by multi-view graph collaborative learning.
+Optimal Modeling of Anti-Breast Cancer Candidate Drugs Based on Graph Model Feature Selection.
+Exploring Integrative Analysis Using the BioMedical Evidence Graph.
+Dual Hyper-Graph Regularized Supervised NMF for Selecting Differentially Expressed Genes and Tumor Classification.
+A review of bioinformatics tools and web servers in different microarray platforms used in cancer research.
+High-throughput NIR spectroscopic (NIRS) detection of microplastics in soil.
+Receptor-based detection of microplastics and nanoplastics: Current and future.
+A review on constructive classification framework of research trends in analytical instrumentation for secondary micro(nano)plastics: What is new and what needs next?
+Current status of microplastics and nanoplastics removal methods: Summary, comparison and prospect.
+Identification of micro- and nanoplastics released from medical masks using hyperspectral imaging and deep learning.
+Liquid Interfacial Coassembly of Plasmonic Arrays and Trace Hydrophobic Nanoplastics in Edible Oils for Robust Identification and Classification by Surface-Enhanced Raman Spectroscopy.
+High-throughput NIR spectroscopic (NIRS) detection of microplastics in soil.
+Spatial distribution of microplastic concentration around landfill sites and its potential risk on groundwater.
+Microplastics in the Florence wastewater treatment plant studied by a continuous sampling method and Raman spectroscopy: A preliminary investigation.
+Analysis of microplastics of a broad size range in commercially important mussels by combining FTIR and Raman spectroscopy approaches.
+Detection methods of micro and nanoplastics.
+Detection methods of micro and nanoplastics.
+Current development and future challenges in microplastic detection techniques: A bibliometrics-based analysis and review.
+Detection methods of micro and nanoplastics.
+Current development and future challenges in microplastic detection techniques: A bibliometrics-based analysis and review.
+Detection methods of micro and nanoplastics.
+Current development and future challenges in microplastic detection techniques: A bibliometrics-based analysis and review.
+Analysis of microplastics in water by micro-Raman spectroscopy: Release of plastic particles from different packaging into mineral water.
+Advanced microplastic monitoring using Raman spectroscopy with a combination of nanostructure-based substrates.
+A beaker method for determination of microplastic concentration by micro-Raman spectroscopy.
+Single-particle analysis of micro/nanoplastics by SEM-Raman technique.
+Detection of Sub-Micro- and Nanoplastic Particles on Gold Nanoparticle-Based Substrates through Surface-Enhanced Raman Scattering (SERS) Spectroscopy.
+Micro-nano-sized polytetrafluoroethylene (teflon) particles as a model of plastic pollution detection in living organisms.
+Analysis of microplastics in water by micro-Raman spectroscopy: Release of plastic particles from different packaging into mineral water.
+Advanced microplastic monitoring using Raman spectroscopy with a combination of nanostructure-based substrates.
+Analysis of microplastics in water by micro-Raman spectroscopy: Release of plastic particles from different packaging into mineral water.
+Advanced microplastic monitoring using Raman spectroscopy with a combination of nanostructure-based substrates.
+Single-particle analysis of micro/nanoplastics by SEM-Raman technique.
+Alcohol Pretreatment to Eliminate the Interference of Micro Additive Particles in the Identification of Microplastics Using Raman Spectroscopy.
+Detection of Sub-Micro- and Nanoplastic Particles on Gold Nanoparticle-Based Substrates through Surface-Enhanced Raman Scattering (SERS) Spectroscopy.
+Micro-nano-sized polytetrafluoroethylene (teflon) particles as a model of plastic pollution detection in living organisms.
+A semi-automated Raman micro-spectroscopy method for morphological and chemical characterizations of microplastic litter.
